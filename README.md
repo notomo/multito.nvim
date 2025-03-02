@@ -1,0 +1,6 @@
+# multito.nvim
+
+## Example
+
+```lua
+```
