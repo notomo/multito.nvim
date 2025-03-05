@@ -16,12 +16,8 @@ function M.panel_completion()
   require("multito.copilot.panel").completion()
 end
 
-function M.panel_next()
-  require("multito.copilot.panel").next()
-end
-
-function M.panel_previous()
-  require("multito.copilot.panel").previous()
+function M.panel_show_item(opts)
+  require("multito.copilot.panel").show_item(opts)
 end
 
 return M

@@ -83,6 +83,8 @@ function M._open(source_bufnr)
       vim.cmd.normal({ args = { vim.keycode("<C-b>") }, bang = true }) -- workaround to show virt lines
       vim.api.nvim_win_set_cursor(window_id, cursor)
     end)
+
+    vim.wo[window_id].winbar = ("[%s / %s] %s"):format(current_index, #items, done and "" or "...")
   end
   render_info()
 
@@ -127,22 +129,17 @@ function M._open(source_bufnr)
   return self
 end
 
-function M.next()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local panel = _panels[bufnr]
-  if not panel then
-    return
-  end
-  panel.next(1)
-end
+function M.show_item(raw_opts)
+  raw_opts = raw_opts or {}
+  raw_opts.offset = raw_opts.offset or 1
 
-function M.previous()
   local bufnr = vim.api.nvim_get_current_buf()
   local panel = _panels[bufnr]
   if not panel then
     return
   end
-  panel.next(-1)
+
+  panel.next(raw_opts.offset)
 end
 
 return M
