@@ -27,7 +27,10 @@ function M.completion()
     client_id = client.id,
   })
 
-  local panel = M._open(bufnr)
+  local panel = M._open({
+    source_bufnr = bufnr,
+    client = client,
+  })
 
   observable:subscribe({
     next = function(progress)
@@ -46,9 +49,9 @@ end
 local ns = vim.api.nvim_create_namespace("multito.copilot.panel")
 local _panels = {}
 
-function M._open(source_bufnr)
+function M._open(open_ctx)
   local bufnr = vim.api.nvim_create_buf(false, true)
-  vim.bo[bufnr].filetype = vim.bo[source_bufnr].filetype
+  vim.bo[bufnr].filetype = vim.bo[open_ctx.source_bufnr].filetype
   vim.bo[bufnr].bufhidden = "wipe"
 
   local current_index = 0
@@ -124,6 +127,11 @@ function M._open(source_bufnr)
     next = function(offset)
       render_item(current_index + offset)
     end,
+    accept = function()
+      local item = items[current_index]
+      local lines = vim.split(item.insertText, "\n", { plain = true })
+      vim.api.nvim_buf_set_lines(open_ctx.source_bufnr, item.range.start.line, item.range["end"].line, false, lines)
+    end,
   }
   _panels[bufnr] = self
   return self
@@ -140,6 +148,16 @@ function M.show_item(raw_opts)
   end
 
   panel.next(raw_opts.offset)
+end
+
+function M.accept()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local panel = _panels[bufnr]
+  if not panel then
+    return
+  end
+
+  panel.accept()
 end
 
 return M
