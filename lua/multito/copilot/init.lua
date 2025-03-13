@@ -5,11 +5,11 @@ function M.config(config)
 end
 
 function M.sign_in()
-  require("multito.copilot.auth").sign_in()
+  return require("multito.copilot.auth").sign_in()
 end
 
 function M.sign_out()
-  require("multito.copilot.auth").sign_out()
+  return require("multito.copilot.auth").sign_out()
 end
 
 function M.panel_completion(opts)

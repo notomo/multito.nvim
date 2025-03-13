@@ -5,11 +5,63 @@ helper.root = vim.fs.root(0, ".git")
 vim.opt.packpath:prepend(vim.fs.joinpath(helper.root, "spec/.shared/packages"))
 require("assertlib").register(require("vusted.assert").register)
 
-function helper.before_each() end
+local notify = vim.notify
+function helper.before_each()
+  vim.g.clipboard = nil
+  vim.notify = notify
+end
 
 function helper.after_each()
   helper.cleanup()
   helper.cleanup_loaded_modules(plugin_name)
+end
+
+function helper.request(result, starter)
+  package.loaded["multito.copilot.lsp"] = {
+    request = function()
+      return require("multito.vendor.promise").resolve(result.request_resolved)
+    end,
+    workspace_execute_command = function()
+      return require("multito.vendor.promise").resolve(result.command_resolved)
+    end,
+  }
+  local finished = false
+  starter():finally(function()
+    finished = true
+  end)
+  local ok = vim.wait(1000, function()
+    return finished
+  end, 10, false)
+  if not ok then
+    error("wait timeout")
+  end
+end
+
+function helper.notified()
+  local messages = {}
+  ---@diagnostic disable-next-line: duplicate-set-field
+  vim.notify = function(msg)
+    table.insert(messages, msg)
+  end
+  return messages
+end
+
+function helper.clipboard()
+  local register = {}
+  vim.g.clipboard = {
+    name = "test",
+    copy = {
+      ["+"] = function(lines)
+        vim.list_extend(register, lines)
+      end,
+    },
+    paste = {
+      ["+"] = function()
+        return register
+      end,
+    },
+  }
+  return register
 end
 
 function helper.start_progress(starter)
