@@ -1,6 +1,9 @@
 local M = {}
 
-function M.completion()
+function M.completion(raw_opts)
+  raw_opts = raw_opts or {}
+  raw_opts.offset = raw_opts.offset or 1
+
   local window_id = vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(window_id)
   local method = "textDocument/copilotPanelCompletion"
@@ -30,12 +33,13 @@ function M.completion()
   local panel = M._open({
     source_bufnr = bufnr,
     client = client,
+    partial_result_token = partial_result_token,
   })
 
   observable:subscribe({
     next = function(progress)
       panel.add(progress)
-      panel.render(1)
+      panel.render(1 + raw_opts.offset)
     end,
     complete = function()
       panel.done()
@@ -50,9 +54,11 @@ local ns = vim.api.nvim_create_namespace("multito.copilot.panel")
 local _panels = {}
 
 function M._open(open_ctx)
-  local bufnr = vim.api.nvim_create_buf(false, true)
+  local name = ("multito://%s/copilot-panel/%s"):format(open_ctx.source_bufnr, open_ctx.partial_result_token)
+  local bufnr = require("multito.vendor.misclib.buffer").find(name) or vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].filetype = vim.bo[open_ctx.source_bufnr].filetype
   vim.bo[bufnr].bufhidden = "wipe"
+  vim.api.nvim_buf_set_name(bufnr, name)
 
   local current_index = 0
   local done = false
@@ -122,6 +128,10 @@ function M._open(open_ctx)
     end,
     done = function()
       done = true
+      M._save({
+        items = items,
+        partial_result_token = open_ctx.partial_result_token,
+      })
       render_info()
     end,
     next = function(offset)
@@ -135,6 +145,32 @@ function M._open(open_ctx)
   }
   _panels[bufnr] = self
   return self
+end
+
+function M._save(save_ctx)
+  local path =
+    vim.fs.joinpath(vim.fn.stdpath("data"), "multito/copilot-panel", ("%s.json"):format(save_ctx.partial_result_token))
+  vim.fn.mkdir(vim.fs.dirname(path), "p")
+  local f = io.open(path, "w")
+  if not f then
+    error("can't open file: " .. path)
+  end
+  f:write(vim.json.encode(save_ctx.items))
+  f:close()
+end
+
+function M._restore(restore_ctx)
+  local path = vim.fs.joinpath(
+    vim.fn.stdpath("data"),
+    "multito/copilot-panel",
+    ("%s.json"):format(restore_ctx.partial_result_token)
+  )
+  local f = io.open(path, "r")
+  if not f then
+    return {}
+  end
+  local content = f:read("*a")
+  return vim.json.decode(content)
 end
 
 function M.show_item(raw_opts)

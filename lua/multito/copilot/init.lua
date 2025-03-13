@@ -12,8 +12,8 @@ function M.sign_out()
   require("multito.copilot.auth").sign_out()
 end
 
-function M.panel_completion()
-  require("multito.copilot.panel").completion()
+function M.panel_completion(opts)
+  require("multito.copilot.panel").completion(opts)
 end
 
 function M.panel_show_item(opts)
