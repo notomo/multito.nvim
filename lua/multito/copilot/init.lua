@@ -20,8 +20,12 @@ function M.panel_show_item(opts)
   require("multito.copilot.panel").show_item(opts)
 end
 
-function M.panel_accept(opts)
-  require("multito.copilot.panel").accept(opts)
+function M.panel_accept()
+  require("multito.copilot.panel").accept()
+end
+
+function M.panel_get(opts)
+  return require("multito.copilot.panel").get(opts)
 end
 
 return M

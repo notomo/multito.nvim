@@ -50,7 +50,6 @@ function M.completion(raw_opts)
   })
 end
 
-local ns = vim.api.nvim_create_namespace("multito.copilot.panel")
 local _panels = {}
 
 function M._open(open_ctx)
@@ -63,7 +62,6 @@ function M._open(open_ctx)
   local current_index = 0
   local done = false
   local items = {}
-  local info_id
 
   vim.cmd.vsplit()
   vim.cmd.buffer(bufnr)
@@ -75,27 +73,6 @@ function M._open(open_ctx)
       _panels[bufnr] = nil
     end,
   })
-
-  local render_info = function()
-    info_id = vim.api.nvim_buf_set_extmark(bufnr, ns, 0, 0, {
-      id = info_id,
-      virt_lines = {
-        {
-          { ("[%s / %s] %s"):format(current_index, #items, done and "" or "..."), "Comment" },
-        },
-      },
-      virt_lines_above = true,
-      right_gravity = false,
-    })
-    vim.api.nvim_win_call(window_id, function()
-      local cursor = vim.api.nvim_win_get_cursor(window_id)
-      vim.cmd.normal({ args = { vim.keycode("<C-b>") }, bang = true }) -- workaround to show virt lines
-      vim.api.nvim_win_set_cursor(window_id, cursor)
-    end)
-
-    vim.wo[window_id].winbar = ("[%s / %s] %s"):format(current_index, #items, done and "" or "...")
-  end
-  render_info()
 
   vim.api.nvim_exec_autocmds("User", {
     pattern = "MultitoCopilotPanelOpened",
@@ -116,7 +93,10 @@ function M._open(open_ctx)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_win_set_cursor(window_id, { 1, 0 })
 
-    render_info()
+    vim.api.nvim_exec_autocmds("User", {
+      pattern = "MultitoCopilotPanelItemShown",
+      modeline = false,
+    })
   end
 
   local self = {
@@ -132,7 +112,11 @@ function M._open(open_ctx)
         items = items,
         partial_result_token = open_ctx.partial_result_token,
       })
-      render_info()
+
+      vim.api.nvim_exec_autocmds("User", {
+        pattern = "MultitoCopilotPanelDone",
+        modeline = false,
+      })
     end,
     next = function(offset)
       render_item(current_index + offset)
@@ -141,6 +125,13 @@ function M._open(open_ctx)
       local item = items[current_index]
       local lines = vim.split(item.insertText, "\n", { plain = true })
       vim.api.nvim_buf_set_lines(open_ctx.source_bufnr, item.range.start.line, item.range["end"].line, false, lines)
+    end,
+    get = function()
+      return {
+        done = done,
+        items = items,
+        current_index = current_index,
+      }
     end,
   }
   _panels[bufnr] = self
@@ -194,6 +185,16 @@ function M.accept()
   end
 
   panel.accept()
+end
+
+function M.get(raw_opts)
+  raw_opts = raw_opts or {}
+  raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+  local panel = _panels[raw_opts.bufnr]
+  if not panel then
+    return
+  end
+  return panel.get()
 end
 
 return M

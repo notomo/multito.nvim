@@ -103,3 +103,27 @@ describe("multito.copilot.panel_accept()", function()
     )
   end)
 end)
+
+describe("multito.copilot.panel_get()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("returns panel info", function()
+    local progress = helper.start_progress(function()
+      return multito.panel_completion()
+    end)
+    local observer = progress.observer
+
+    local progress_item = helper.progress({
+      insertText = "// test1\n// test2",
+    })
+    observer.next(progress_item)
+    observer.complete()
+
+    assert.same({
+      current_index = 1,
+      done = true,
+      items = progress_item.value.items,
+    }, multito.panel_get())
+  end)
+end)
