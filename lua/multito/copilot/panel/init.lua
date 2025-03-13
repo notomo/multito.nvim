@@ -30,7 +30,7 @@ function M.completion(raw_opts)
     client_id = client.id,
   })
 
-  local panel = M._open({
+  local panel = require("multito.copilot.panel.view").open({
     source_bufnr = bufnr,
     client = client,
     partial_result_token = partial_result_token,
@@ -38,11 +38,11 @@ function M.completion(raw_opts)
 
   observable:subscribe({
     next = function(progress)
-      panel.add(progress)
-      panel.render(1 + raw_opts.offset)
+      panel:add(progress)
+      panel:render(1 + raw_opts.offset)
     end,
     complete = function()
-      panel.done()
+      panel:done()
     end,
     error = function(err)
       require("multito.lib.message").warn(err)
@@ -50,121 +50,41 @@ function M.completion(raw_opts)
   })
 end
 
-local _panels = {}
-
-function M._open(open_ctx)
-  local name = ("multito://%s/copilot-panel/%s"):format(open_ctx.source_bufnr, open_ctx.partial_result_token)
-  local bufnr = require("multito.vendor.misclib.buffer").find(name) or vim.api.nvim_create_buf(false, true)
-  vim.bo[bufnr].filetype = vim.bo[open_ctx.source_bufnr].filetype
-  vim.bo[bufnr].bufhidden = "wipe"
-  vim.api.nvim_buf_set_name(bufnr, name)
-
-  local current_index = 0
-  local done = false
-  local items = {}
-
-  vim.cmd.vsplit()
-  vim.cmd.buffer(bufnr)
-  local window_id = vim.api.nvim_get_current_win()
-  vim.api.nvim_create_autocmd({ "BufWipeout" }, {
-    group = vim.api.nvim_create_augroup("multito.copilot.panel", {}),
-    buffer = bufnr,
-    callback = function()
-      _panels[bufnr] = nil
-    end,
-  })
-
-  vim.api.nvim_exec_autocmds("User", {
-    pattern = "MultitoCopilotPanelOpened",
-    modeline = false,
-  })
-
-  local render_item = function(index)
-    index = math.max(1, index)
-    index = math.min(index, #items)
-
-    if current_index == index then
-      return
-    end
-    current_index = index
-
-    local item = items[index]
-    local lines = vim.split(item.insertText, "\n", { plain = true })
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.api.nvim_win_set_cursor(window_id, { 1, 0 })
-
-    vim.api.nvim_exec_autocmds("User", {
-      pattern = "MultitoCopilotPanelItemShown",
-      modeline = false,
-    })
-  end
-
-  local self = {
-    add = function(progress)
-      vim.list_extend(items, progress.value.items)
-    end,
-    render = function(index)
-      render_item(index)
-    end,
-    done = function()
-      done = true
-
-      vim.api.nvim_exec_autocmds("User", {
-        pattern = "MultitoCopilotPanelDone",
-        modeline = false,
-      })
-    end,
-    next = function(offset)
-      render_item(current_index + offset)
-    end,
-    accept = function()
-      local item = items[current_index]
-      local lines = vim.split(item.insertText, "\n", { plain = true })
-      vim.api.nvim_buf_set_lines(open_ctx.source_bufnr, item.range.start.line, item.range["end"].line, false, lines)
-    end,
-    get = function()
-      return {
-        done = done,
-        items = items,
-        current_index = current_index,
-      }
-    end,
-  }
-  _panels[bufnr] = self
-  return self
-end
-
 function M.show_item(raw_opts)
   raw_opts = raw_opts or {}
   raw_opts.offset = raw_opts.offset or 1
+  raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
 
-  local bufnr = vim.api.nvim_get_current_buf()
-  local panel = _panels[bufnr]
+  local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
   if not panel then
     return
   end
 
-  panel.next(raw_opts.offset)
+  panel:show_item(raw_opts.offset)
 end
 
-function M.accept()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local panel = _panels[bufnr]
+function M.accept(raw_opts)
+  raw_opts = raw_opts or {}
+  raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+
+  local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
   if not panel then
     return
   end
 
-  panel.accept()
+  panel:accept()
 end
 
 function M.get(raw_opts)
   raw_opts = raw_opts or {}
   raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
-  local panel = _panels[raw_opts.bufnr]
+
+  local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
   if not panel then
     return
   end
-  return panel.get()
+
+  return panel:get()
 end
 
 return M
