@@ -108,10 +108,6 @@ function M._open(open_ctx)
     end,
     done = function()
       done = true
-      M._save({
-        items = items,
-        partial_result_token = open_ctx.partial_result_token,
-      })
 
       vim.api.nvim_exec_autocmds("User", {
         pattern = "MultitoCopilotPanelDone",
@@ -136,32 +132,6 @@ function M._open(open_ctx)
   }
   _panels[bufnr] = self
   return self
-end
-
-function M._save(save_ctx)
-  local path =
-    vim.fs.joinpath(vim.fn.stdpath("data"), "multito/copilot-panel", ("%s.json"):format(save_ctx.partial_result_token))
-  vim.fn.mkdir(vim.fs.dirname(path), "p")
-  local f = io.open(path, "w")
-  if not f then
-    error("can't open file: " .. path)
-  end
-  f:write(vim.json.encode(save_ctx.items))
-  f:close()
-end
-
-function M._restore(restore_ctx)
-  local path = vim.fs.joinpath(
-    vim.fn.stdpath("data"),
-    "multito/copilot-panel",
-    ("%s.json"):format(restore_ctx.partial_result_token)
-  )
-  local f = io.open(path, "r")
-  if not f then
-    return {}
-  end
-  local content = f:read("*a")
-  return vim.json.decode(content)
 end
 
 function M.show_item(raw_opts)
