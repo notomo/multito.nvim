@@ -23,6 +23,24 @@ describe("multito.copilot.panel_completion()", function()
 // test2]])
     assert.equal("multito-test", vim.bo.filetype)
   end)
+
+  it("opened buffer can be reloaded", function()
+    local progress = helper.start_progress(function()
+      return multito.panel_completion()
+    end)
+    local observer = progress.observer
+
+    observer.next(helper.progress({
+      insertText = "// test1\n// test2",
+    }))
+    observer.complete()
+
+    vim.cmd.edit({ bang = true })
+
+    assert.exists_pattern([[
+// test1
+// test2]])
+  end)
 end)
 
 describe("multito.copilot.panel_show_item()", function()

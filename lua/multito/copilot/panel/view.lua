@@ -19,14 +19,6 @@ function M.open(open_ctx)
 
   open_ctx.open(bufnr)
 
-  vim.api.nvim_create_autocmd({ "BufWipeout" }, {
-    group = vim.api.nvim_create_augroup("multito.copilot.panel", {}),
-    buffer = bufnr,
-    callback = function()
-      _panels[bufnr] = nil
-    end,
-  })
-
   vim.api.nvim_exec_autocmds("User", {
     pattern = "MultitoCopilotPanelOpened",
     modeline = false,
@@ -40,7 +32,24 @@ function M.open(open_ctx)
     _items = {},
   }
   local self = setmetatable(tbl, M)
+
   _panels[bufnr] = self
+
+  vim.api.nvim_create_autocmd({ "BufWipeout" }, {
+    group = vim.api.nvim_create_augroup("multito.copilot.panel", {}),
+    buffer = bufnr,
+    callback = function()
+      _panels[bufnr] = nil
+    end,
+  })
+  vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
+    buffer = bufnr,
+    nested = true,
+    callback = function()
+      self:_reload()
+    end,
+  })
+
   return self
 end
 
@@ -63,6 +72,19 @@ function M.render(self, index)
 
   vim.api.nvim_exec_autocmds("User", {
     pattern = "MultitoCopilotPanelItemShown",
+    modeline = false,
+  })
+end
+
+function M._reload(self)
+  local index = self._current_index
+  self._current_index = 0
+  self:show_item(index)
+
+  vim.bo[self._bufnr].filetype = vim.bo[self._source_bufnr].filetype
+
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "MultitoCopilotPanelOpened",
     modeline = false,
   })
 end
