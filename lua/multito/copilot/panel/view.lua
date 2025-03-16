@@ -27,9 +27,9 @@ function M.open(open_ctx)
   local tbl = {
     _bufnr = bufnr,
     _source_bufnr = open_ctx.source_bufnr,
-    _current_index = 0,
-    _done = false,
-    _items = {},
+    _current_index = open_ctx.current_index or 0,
+    _done = open_ctx.done or false,
+    _items = open_ctx.items or {},
   }
   local self = setmetatable(tbl, M)
 
@@ -114,12 +114,32 @@ function M.get(self)
     done = self._done,
     items = self._items,
     current_index = self._current_index,
+    source_bufnr = self._source_bufnr,
   }
 end
 
 --- @return MultitoCopilotPanel?
 function M.from(bufnr)
-  return _panels[bufnr]
+  local panel = _panels[bufnr]
+  if panel then
+    return panel
+  end
+
+  if vim.b[bufnr].multito_copilot_panel_debug_state then
+    local state = vim.b[bufnr].multito_copilot_panel_debug_state
+    local splitted_name = vim.split(vim.api.nvim_buf_get_name(bufnr), "/", { plain = true })
+    local partial_result_token = splitted_name[#splitted_name]
+    return require("multito.copilot.panel.view").open({
+      source_bufnr = state.source_bufnr,
+      partial_result_token = partial_result_token,
+      open = function() end,
+      items = state.items,
+      current_index = state.current_index,
+      done = state.done,
+    })
+  end
+
+  return nil
 end
 
 return M

@@ -127,6 +127,8 @@ describe("multito.copilot.panel_get()", function()
   after_each(helper.after_each)
 
   it("returns panel info", function()
+    local source_bufnr = vim.api.nvim_get_current_buf()
+
     local progress = helper.start_progress(function()
       return multito.panel_completion()
     end)
@@ -142,6 +144,7 @@ describe("multito.copilot.panel_get()", function()
       current_index = 1,
       done = true,
       items = progress_item.value.items,
+      source_bufnr = source_bufnr,
     }, multito.panel_get())
   end)
 end)
