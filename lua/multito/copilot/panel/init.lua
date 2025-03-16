@@ -2,7 +2,14 @@ local M = {}
 
 function M.completion(raw_opts)
   raw_opts = raw_opts or {}
-  raw_opts.offset = raw_opts.offset or 1
+  raw_opts.offset = raw_opts.offset or 0
+  raw_opts.open = raw_opts.open
+    or function(bufnr)
+      vim.api.nvim_open_win(bufnr, true, {
+        split = "left",
+        vertical = true,
+      })
+    end
 
   local window_id = vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(window_id)
@@ -34,6 +41,7 @@ function M.completion(raw_opts)
     source_bufnr = bufnr,
     client = client,
     partial_result_token = partial_result_token,
+    open = raw_opts.open,
   })
 
   observable:subscribe({

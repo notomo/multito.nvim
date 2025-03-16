@@ -17,8 +17,7 @@ function M.open(open_ctx)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.api.nvim_buf_set_name(bufnr, name)
 
-  vim.cmd.vsplit()
-  vim.cmd.buffer(bufnr)
+  open_ctx.open(bufnr)
 
   vim.api.nvim_create_autocmd({ "BufWipeout" }, {
     group = vim.api.nvim_create_augroup("multito.copilot.panel", {}),
