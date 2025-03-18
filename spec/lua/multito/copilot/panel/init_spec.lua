@@ -111,7 +111,7 @@ describe("multito.copilot.panel_accept()", function()
     }))
     observer.complete()
 
-    multito.panel_accept()
+    helper.wait(multito.panel_accept())
 
     assert.exists_pattern(
       [[
@@ -145,6 +145,7 @@ describe("multito.copilot.panel_get()", function()
       done = true,
       items = progress_item.value.items,
       source_bufnr = source_bufnr,
+      client_id = "dummyId",
     }, multito.panel_get())
   end)
 end)

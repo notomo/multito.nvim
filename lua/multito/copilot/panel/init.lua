@@ -39,7 +39,7 @@ function M.completion(raw_opts)
 
   local panel = require("multito.copilot.panel.view").open({
     source_bufnr = bufnr,
-    client = client,
+    client_id = client.id,
     partial_result_token = partial_result_token,
     open = raw_opts.open,
   })
@@ -77,10 +77,10 @@ function M.accept(raw_opts)
 
   local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
   if not panel then
-    return
+    return require("multito.vendor.promise").resolve()
   end
 
-  panel:accept()
+  return panel:accept()
 end
 
 function M.get(raw_opts)

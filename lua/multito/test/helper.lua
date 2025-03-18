@@ -1,7 +1,7 @@
 local helper = require("vusted.helper")
 local plugin_name = helper.get_module_root(...)
 
-helper.root = vim.fs.root(0, ".git")
+helper.root = helper.find_plugin_root(plugin_name)
 vim.opt.packpath:prepend(vim.fs.joinpath(helper.root, "spec/.shared/packages"))
 require("assertlib").register(require("vusted.assert").register)
 
@@ -16,6 +16,19 @@ function helper.after_each()
   helper.cleanup_loaded_modules(plugin_name)
 end
 
+function helper.wait(promise)
+  local finished = false
+  promise:finally(function()
+    finished = true
+  end)
+  local ok = vim.wait(1000, function()
+    return finished
+  end, 10, false)
+  if not ok then
+    error("wait timeout")
+  end
+end
+
 function helper.request(result, starter)
   package.loaded["multito.copilot.lsp"] = {
     request = function()
@@ -25,16 +38,7 @@ function helper.request(result, starter)
       return require("multito.vendor.promise").resolve(result.command_resolved)
     end,
   }
-  local finished = false
-  starter():finally(function()
-    finished = true
-  end)
-  local ok = vim.wait(1000, function()
-    return finished
-  end, 10, false)
-  if not ok then
-    error("wait timeout")
-  end
+  helper.wait(starter())
 end
 
 function helper.notified()
@@ -82,6 +86,9 @@ function helper.start_progress(starter)
           tbl.observer = o
         end,
       }
+    end,
+    workspace_execute_command = function()
+      return require("multito.vendor.promise").resolve()
     end,
   }
   tbl.result = starter()

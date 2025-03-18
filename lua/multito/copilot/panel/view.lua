@@ -5,6 +5,7 @@
 --- @field private _source_bufnr integer
 --- @field private _bufnr integer
 --- @field private _window_id integer
+--- @field private _client_id integer
 local M = {}
 M.__index = M
 
@@ -28,6 +29,7 @@ function M.open(open_ctx)
     _bufnr = bufnr,
     _source_bufnr = open_ctx.source_bufnr,
     _current_index = open_ctx.current_index or 0,
+    _client_id = open_ctx.client_id,
     _done = open_ctx.done or false,
     _items = open_ctx.items or {},
   }
@@ -107,6 +109,12 @@ function M.accept(self)
   local item = self._items[self._current_index]
   local lines = vim.split(item.insertText, "\n", { plain = true })
   vim.api.nvim_buf_set_lines(self._source_bufnr, item.range.start.line, item.range["end"].line, false, lines)
+
+  return require("multito.copilot.lsp").workspace_execute_command({
+    client_id = self._client_id,
+    bufnr = self._bufnr,
+    command = item.command,
+  })
 end
 
 function M.get(self)
@@ -115,6 +123,7 @@ function M.get(self)
     items = self._items,
     current_index = self._current_index,
     source_bufnr = self._source_bufnr,
+    client_id = self._client_id,
   }
 end
 
@@ -135,6 +144,7 @@ function M.from(bufnr)
       open = function() end,
       items = state.items,
       current_index = state.current_index,
+      client_id = state.client_id,
       done = state.done,
     })
   end
