@@ -1,11 +1,12 @@
 local M = {}
 
-function M.config(raw_config)
+function M.start(raw_opts)
+  raw_opts = raw_opts or {}
+
   local version = vim.version()
   local config = vim.tbl_extend("force", {
     cmd = { "copilot-language-server", "--stdio" },
-    root_markers = { ".git" },
-    filetypes = { "typescript" },
+    root_dir = vim.fs.root(0, ".git"),
     init_options = {
       editorInfo = {
         name = "Neovim",
@@ -16,10 +17,15 @@ function M.config(raw_config)
         version = "*",
       },
     },
-  }, raw_config or {})
-  vim.lsp.config("copilot", config)
+  }, raw_opts.config or {})
 
-  vim.lsp.enable("copilot")
+  config.name = "copilot"
+
+  local client_id = vim.lsp.start(config)
+
+  return {
+    client_id = client_id,
+  }
 end
 
 function M.get_client(req_ctx)

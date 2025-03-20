@@ -1,7 +1,7 @@
 local M = {}
 
-function M.config(config)
-  require("multito.copilot.lsp").config(config)
+function M.start(opts)
+  return require("multito.copilot.lsp").start(opts)
 end
 
 function M.sign_in()
