@@ -3,10 +3,13 @@ local M = {}
 function M.start(raw_opts)
   raw_opts = raw_opts or {}
 
+  local bufnr = vim.api.nvim_get_current_buf()
+  local root_dir = vim.fs.root(bufnr, ".git")
+
   local version = vim.version()
   local config = vim.tbl_extend("force", {
     cmd = { "copilot-language-server", "--stdio" },
-    root_dir = vim.fs.root(0, ".git"),
+    root_dir = root_dir,
     init_options = {
       editorInfo = {
         name = "Neovim",
@@ -21,7 +24,32 @@ function M.start(raw_opts)
 
   config.name = "copilot"
 
-  local client_id = vim.lsp.start(config)
+  local client_id = assert(vim.lsp.start(config))
+
+  vim.api.nvim_create_autocmd({ "BufEnter" }, {
+    group = vim.api.nvim_create_augroup(("multito.copilot.lsp.%s"):format(client_id), {}),
+    pattern = {
+      ("%s/**"):format(root_dir),
+    },
+    callback = function(args)
+      local client = vim.lsp.get_client_by_id(client_id)
+      if not client then
+        return
+      end
+
+      local focus_bufnr = tonumber(args.buf)
+
+      local params = {}
+      if vim.bo[focus_bufnr].buftype ~= "" then
+        params.textDocument = vim.lsp.util.make_text_document_params(focus_bufnr)
+      else
+        params._ = true
+      end
+
+      local method = "textDocument/didFocus"
+      client:notify(method, params)
+    end,
+  })
 
   return {
     client_id = client_id,
