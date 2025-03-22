@@ -1,7 +1,7 @@
 local M = {}
 
 function M.info(message, attributes)
-  vim.notify(("[multito] %s%s"):format(message, vim.inspect(attributes)))
+  vim.notify(("[multito] %s%s"):format(message, attributes and vim.inspect(attributes) or ""))
 end
 
 function M.warn(err)
