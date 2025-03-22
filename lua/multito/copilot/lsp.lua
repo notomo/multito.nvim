@@ -4,12 +4,11 @@ function M.start(raw_opts)
   raw_opts = raw_opts or {}
 
   local bufnr = vim.api.nvim_get_current_buf()
-  local root_dir = vim.fs.root(bufnr, ".git")
 
   local version = vim.version()
   local config = vim.tbl_extend("force", {
     cmd = { "copilot-language-server", "--stdio" },
-    root_dir = root_dir,
+    root_dir = vim.fs.root(bufnr, ".git"),
     init_options = {
       editorInfo = {
         name = "Neovim",
@@ -29,7 +28,7 @@ function M.start(raw_opts)
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     group = vim.api.nvim_create_augroup(("multito.copilot.lsp.%s"):format(client_id), {}),
     pattern = {
-      ("%s/**"):format(root_dir),
+      ("%s/**"):format(config.root_dir),
     },
     callback = function(args)
       local client = vim.lsp.get_client_by_id(client_id)
