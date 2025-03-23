@@ -12,7 +12,7 @@ M.__index = M
 local _panels = {}
 
 function M.open(open_ctx)
-  local name = ("multito://%s/copilot-panel/%s"):format(open_ctx.source_bufnr, open_ctx.partial_result_token)
+  local name = ("multito://%s/%s/copilot-panel"):format(open_ctx.source_bufnr, open_ctx.partial_result_token)
   local bufnr = require("multito.vendor.misclib.buffer").find(name) or vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].filetype = vim.bo[open_ctx.source_bufnr].filetype
   vim.bo[bufnr].bufhidden = "wipe"
