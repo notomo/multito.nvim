@@ -1,9 +1,11 @@
 local M = {}
 
-function M.completion(raw_opts)
-  raw_opts = raw_opts or {}
-  raw_opts.offset = raw_opts.offset or 0
-  raw_opts.open = raw_opts.open
+--- Open panel and show completion items.
+--- @param opts {offset:integer?,open:fun(bufnr:integer)}?
+function M.completion(opts)
+  opts = opts or {}
+  opts.offset = opts.offset or 0
+  opts.open = opts.open
     or function(bufnr)
       vim.api.nvim_open_win(bufnr, true, {
         split = "left",
@@ -41,13 +43,13 @@ function M.completion(raw_opts)
     source_bufnr = bufnr,
     client_id = client.id,
     partial_result_token = partial_result_token,
-    open = raw_opts.open,
+    open = opts.open,
   })
 
   observable:subscribe({
     next = function(progress)
       panel:add(progress)
-      panel:render(1 + raw_opts.offset)
+      panel:render(1 + opts.offset)
     end,
     complete = function()
       panel:done()
@@ -58,24 +60,28 @@ function M.completion(raw_opts)
   })
 end
 
-function M.show_item(raw_opts)
-  raw_opts = raw_opts or {}
-  raw_opts.offset = raw_opts.offset or 1
-  raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+--- Show completion item.
+--- @param opts {bufnr:integer?,offset:integer?}?
+function M.show_item(opts)
+  opts = opts or {}
+  opts.offset = opts.offset or 1
+  opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
 
-  local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
+  local panel = require("multito.copilot.panel.view").from(opts.bufnr)
   if not panel then
     return
   end
 
-  panel:show_item(raw_opts.offset)
+  panel:show_item(opts.offset)
 end
 
-function M.accept(raw_opts)
-  raw_opts = raw_opts or {}
-  raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+--- Accepts completion item.
+--- @param opts {bufnr:integer?}?
+function M.accept(opts)
+  opts = opts or {}
+  opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
 
-  local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
+  local panel = require("multito.copilot.panel.view").from(opts.bufnr)
   if not panel then
     return require("multito.vendor.promise").resolve()
   end
@@ -83,11 +89,12 @@ function M.accept(raw_opts)
   return panel:accept()
 end
 
-function M.get(raw_opts)
-  raw_opts = raw_opts or {}
-  raw_opts.bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+--- @param opts {bufnr:integer?}?
+function M.get(opts)
+  opts = opts or {}
+  opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
 
-  local panel = require("multito.copilot.panel.view").from(raw_opts.bufnr)
+  local panel = require("multito.copilot.panel.view").from(opts.bufnr)
   if not panel then
     return
   end

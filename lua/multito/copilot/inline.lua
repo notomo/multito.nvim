@@ -1,8 +1,7 @@
 local M = {}
 
-function M.completion(raw_opts)
-  raw_opts = raw_opts or {}
-
+--- Show inline completion.
+function M.completion()
   local window_id = vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(window_id)
   local method = "textDocument/inlineCompletion"
@@ -99,9 +98,11 @@ function M._show(show_ctx)
   vim.api.nvim_buf_set_extmark(show_ctx.bufnr, ns, range.start.line, range.start.character, opts)
 end
 
-function M.accept(raw_opts)
-  raw_opts = raw_opts or {}
-  local bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+--- Accepts completion.
+--- @param opts {bufnr:integer?}?
+function M.accept(opts)
+  opts = opts or {}
+  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
 
   local candidate = _candidate[bufnr]
   if not candidate then
@@ -121,9 +122,11 @@ function M.accept(raw_opts)
   })
 end
 
-function M.clear(raw_opts)
-  raw_opts = raw_opts or {}
-  local bufnr = raw_opts.bufnr or vim.api.nvim_get_current_buf()
+--- Clears completion.
+--- @param opts {bufnr:integer?}?
+function M.clear(opts)
+  opts = opts or {}
+  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
 
   _candidate[bufnr] = nil
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)

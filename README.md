@@ -1,6 +1,3 @@
 # multito.nvim
 
-## Example
-
-```lua
-```
+experiment
