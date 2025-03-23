@@ -31,6 +31,12 @@ end
 
 function helper.request(result, starter)
   package.loaded["multito.copilot.lsp"] = {
+    get_client = function()
+      return {
+        id = "dummyId",
+        offset_encoding = "utf-8",
+      }
+    end,
     request = function()
       return require("multito.vendor.promise").resolve(result.request_resolved)
     end,
@@ -118,6 +124,31 @@ function helper.progress(item)
           },
         }, item),
       },
+    },
+  }
+end
+
+function helper.inline_completion(item)
+  return {
+    items = {
+      vim.tbl_deep_extend("force", {
+        command = {
+          arguments = { "8888888888888888888888888888888888888888888888888888888888888888" },
+          command = "github.copilot.didAcceptCompletionItem",
+          title = "Completion accepted",
+        },
+        insertText = "",
+        range = {
+          ["end"] = {
+            character = 0,
+            line = 0,
+          },
+          start = {
+            character = 0,
+            line = 0,
+          },
+        },
+      }, item),
     },
   }
 end
