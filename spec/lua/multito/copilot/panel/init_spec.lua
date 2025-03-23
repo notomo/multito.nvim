@@ -1,14 +1,14 @@
 local helper = require("multito.test.helper")
-local multito = helper.require("multito.copilot")
+local multito_panel = helper.require("multito.copilot.panel")
 local assert = require("assertlib").typed(assert)
 
-describe("multito.copilot.panel_completion()", function()
+describe("multito.copilot.panel.completion()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
   it("opens panel and renders completion text", function()
     local progress = helper.start_progress(function()
-      return multito.panel_completion()
+      return multito_panel.completion()
     end)
     local observer = progress.observer
     vim.bo.filetype = "multito-test"
@@ -26,7 +26,7 @@ describe("multito.copilot.panel_completion()", function()
 
   it("opened buffer can be reloaded", function()
     local progress = helper.start_progress(function()
-      return multito.panel_completion()
+      return multito_panel.completion()
     end)
     local observer = progress.observer
 
@@ -43,13 +43,13 @@ describe("multito.copilot.panel_completion()", function()
   end)
 end)
 
-describe("multito.copilot.panel_show_item()", function()
+describe("multito.copilot.panel.show_item()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
   it("can show next item", function()
     local progress = helper.start_progress(function()
-      return multito.panel_completion()
+      return multito_panel.completion()
     end)
     local observer = progress.observer
 
@@ -61,7 +61,7 @@ describe("multito.copilot.panel_show_item()", function()
     }))
     observer.complete()
 
-    multito.panel_show_item({ offset = 1 })
+    multito_panel.show_item({ offset = 1 })
 
     assert.exists_pattern([[
 // test3
@@ -70,7 +70,7 @@ describe("multito.copilot.panel_show_item()", function()
 
   it("can show previous item", function()
     local progress = helper.start_progress(function()
-      return multito.panel_completion({ offset = 1 })
+      return multito_panel.completion({ offset = 1 })
     end)
     local observer = progress.observer
 
@@ -86,7 +86,7 @@ describe("multito.copilot.panel_show_item()", function()
 // test3
 // test4]])
 
-    multito.panel_show_item({ offset = -1 })
+    multito_panel.show_item({ offset = -1 })
 
     assert.exists_pattern([[
 // test1
@@ -94,7 +94,7 @@ describe("multito.copilot.panel_show_item()", function()
   end)
 end)
 
-describe("multito.copilot.panel_accept()", function()
+describe("multito.copilot.panel.accept()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -102,7 +102,7 @@ describe("multito.copilot.panel_accept()", function()
     local source_bufnr = vim.api.nvim_get_current_buf()
 
     local progress = helper.start_progress(function()
-      return multito.panel_completion()
+      return multito_panel.completion()
     end)
     local observer = progress.observer
 
@@ -111,7 +111,7 @@ describe("multito.copilot.panel_accept()", function()
     }))
     observer.complete()
 
-    helper.wait(multito.panel_accept())
+    helper.wait(multito_panel.accept())
 
     assert.exists_pattern(
       [[
@@ -122,7 +122,7 @@ describe("multito.copilot.panel_accept()", function()
   end)
 end)
 
-describe("multito.copilot.panel_get()", function()
+describe("multito.copilot.panel.get()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -130,7 +130,7 @@ describe("multito.copilot.panel_get()", function()
     local source_bufnr = vim.api.nvim_get_current_buf()
 
     local progress = helper.start_progress(function()
-      return multito.panel_completion()
+      return multito_panel.completion()
     end)
     local observer = progress.observer
 
@@ -146,6 +146,6 @@ describe("multito.copilot.panel_get()", function()
       items = progress_item.value.items,
       source_bufnr = source_bufnr,
       client_id = "dummyId",
-    }, multito.panel_get())
+    }, multito_panel.get())
   end)
 end)

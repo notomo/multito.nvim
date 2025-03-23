@@ -24,20 +24,4 @@ function M.inline_clear(opts)
   require("multito.copilot.inline").clear(opts)
 end
 
-function M.panel_completion(opts)
-  require("multito.copilot.panel").completion(opts)
-end
-
-function M.panel_show_item(opts)
-  require("multito.copilot.panel").show_item(opts)
-end
-
-function M.panel_accept(opts)
-  return require("multito.copilot.panel").accept(opts)
-end
-
-function M.panel_get(opts)
-  return require("multito.copilot.panel").get(opts)
-end
-
 return M
