@@ -45,7 +45,7 @@ function M.completion(raw_opts)
         return
       end
 
-      M.show({
+      M._show({
         bufnr = bufnr,
         client_id = data.ctx.client_id,
         item = item,
@@ -60,7 +60,7 @@ local ns = vim.api.nvim_create_namespace("multito.copilot.inline.candidate")
 
 local _candidate = {}
 
-function M.show(show_ctx)
+function M._show(show_ctx)
   local bufnr = show_ctx.bufnr
 
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
