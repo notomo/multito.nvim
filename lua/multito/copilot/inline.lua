@@ -99,10 +99,11 @@ function M._show(show_ctx)
 end
 
 --- Accepts completion.
---- @param opts {bufnr:integer?}?
+--- @param opts {window_id:integer?}?
 function M.accept(opts)
   opts = opts or {}
-  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+  local window_id = opts.window_id or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
 
   local candidate = _candidate[bufnr]
   if not candidate then
@@ -111,7 +112,18 @@ function M.accept(opts)
 
   local item = candidate.item
   local lines = vim.split(item.insertText, "\n", { plain = true })
-  vim.api.nvim_buf_set_lines(bufnr, item.range.start.line, item.range["end"].line, false, lines)
+  vim.api.nvim_buf_set_text(
+    bufnr,
+    item.range.start.line,
+    item.range.start.character,
+    item.range["end"].line,
+    item.range["end"].character,
+    lines
+  )
+  require("multito.vendor.misclib.cursor").set({
+    item.range.start.line + #lines,
+    #lines[#lines],
+  }, window_id)
 
   M.clear({ bufnr = bufnr })
 
@@ -123,10 +135,11 @@ function M.accept(opts)
 end
 
 --- Clears completion.
---- @param opts {bufnr:integer?}?
+--- @param opts {window_id:integer?}?
 function M.clear(opts)
   opts = opts or {}
-  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+  local window_id = opts.window_id or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
 
   _candidate[bufnr] = nil
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)

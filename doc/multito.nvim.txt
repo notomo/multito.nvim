@@ -25,13 +25,13 @@ accept({opts})                               *multito.copilot.inline.accept()*
   Accepts completion.
 
   Parameters: ~
-    {opts} ({bufnr:integer?}?) 
+    {opts} ({window_id:integer?}?) 
 
 clear({opts})                                 *multito.copilot.inline.clear()*
   Clears completion.
 
   Parameters: ~
-    {opts} ({bufnr:integer?}?) 
+    {opts} ({window_id:integer?}?) 
 
 ==============================================================================
 Lua module: multito.copilot.panel         *multito.nvim-multito.copilot.panel*

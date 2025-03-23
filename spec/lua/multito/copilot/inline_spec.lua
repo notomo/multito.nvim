@@ -7,13 +7,25 @@ describe("multito.copilot.inline.accept()", function()
   after_each(helper.after_each)
 
   it("sets text to buffer", function()
+    helper.set_lines([[before]])
+
     helper.request({
       request_resolved = {
         ctx = {
           id = "dummyId",
         },
         result = helper.inline_completion({
-          insertText = "test1\ntest2\ntest3",
+          insertText = "before test1\ntest2\ntest3",
+          range = {
+            start = {
+              line = 0,
+              character = 0,
+            },
+            ["end"] = {
+              line = 0,
+              character = 6,
+            },
+          },
         }),
       },
     }, function()
@@ -23,9 +35,12 @@ describe("multito.copilot.inline.accept()", function()
     helper.wait(multito_inline.accept())
 
     assert.exists_pattern([[
-test1
+before test1
 test2
 test3]])
+
+    assert.cursor_row(3)
+    assert.cursor_column(5)
   end)
 end)
 
