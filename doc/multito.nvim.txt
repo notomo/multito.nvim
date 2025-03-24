@@ -33,6 +33,15 @@ clear({opts})                                 *multito.copilot.inline.clear()*
   Parameters: ~
     {opts} ({window_id:integer?}?) 
 
+get({opts})                                     *multito.copilot.inline.get()*
+  Get completion items.
+
+  Parameters: ~
+    {opts} ({window_id:integer?}?) 
+
+  Return: ~
+    ({items:table[]}?) 
+
 ==============================================================================
 Lua module: multito.copilot.panel         *multito.nvim-multito.copilot.panel*
 

@@ -145,4 +145,21 @@ function M.clear(opts)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 
+--- Get completion items.
+--- @param opts {window_id:integer?}?
+--- @return {items:table[]}?
+function M.get(opts)
+  opts = opts or {}
+  local window_id = opts.window_id or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
+  local candiadte = _candidate[bufnr]
+  if not candiadte then
+    return nil
+  end
+
+  return {
+    items = { candiadte.item },
+  }
+end
+
 return M

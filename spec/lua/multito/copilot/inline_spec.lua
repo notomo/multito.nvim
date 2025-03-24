@@ -68,3 +68,35 @@ describe("multito.copilot.inline.clear()", function()
     assert.no.exists_pattern([[test]])
   end)
 end)
+
+describe("multito.copilot.inline.get()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("return items", function()
+    local value = helper.inline_completion({
+      insertText = "test",
+    })
+
+    helper.request({
+      request_resolved = {
+        ctx = {
+          id = "dummyId",
+        },
+        result = value,
+      },
+    }, function()
+      return multito_inline.completion()
+    end)
+
+    local got = multito_inline.get()
+    assert.same({
+      items = { value.items[1] },
+    }, got)
+  end)
+
+  it("return nil if no completion", function()
+    local got = multito_inline.get()
+    assert.is_nil(got)
+  end)
+end)
