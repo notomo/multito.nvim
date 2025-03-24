@@ -55,18 +55,18 @@ show_item({opts})                          *multito.copilot.panel.show_item()*
   Show completion item.
 
   Parameters: ~
-    {opts} ({bufnr:integer?,offset:integer?}?) 
+    {opts} ({window_id:integer?,offset:integer?}?) 
 
 accept({opts})                                *multito.copilot.panel.accept()*
   Accepts completion item.
 
   Parameters: ~
-    {opts} ({bufnr:integer?}?) 
+    {opts} ({window_id:integer?}?) 
 
 get({opts})                                      *multito.copilot.panel.get()*
 
   Parameters: ~
-    {opts} ({bufnr:integer?}?) 
+    {opts} ({window_id:integer?}?) 
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help

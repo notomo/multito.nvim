@@ -61,13 +61,14 @@ function M.completion(opts)
 end
 
 --- Show completion item.
---- @param opts {bufnr:integer?,offset:integer?}?
+--- @param opts {window_id:integer?,offset:integer?}?
 function M.show_item(opts)
   opts = opts or {}
   opts.offset = opts.offset or 1
-  opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+  local window_id = opts.window_id or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
 
-  local panel = require("multito.copilot.panel.view").from(opts.bufnr)
+  local panel = require("multito.copilot.panel.view").from(bufnr)
   if not panel then
     return
   end
@@ -76,12 +77,13 @@ function M.show_item(opts)
 end
 
 --- Accepts completion item.
---- @param opts {bufnr:integer?}?
+--- @param opts {window_id:integer?}?
 function M.accept(opts)
   opts = opts or {}
-  opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+  local window_id = opts.window_id or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
 
-  local panel = require("multito.copilot.panel.view").from(opts.bufnr)
+  local panel = require("multito.copilot.panel.view").from(bufnr)
   if not panel then
     return require("multito.vendor.promise").resolve()
   end
@@ -89,12 +91,13 @@ function M.accept(opts)
   return panel:accept()
 end
 
---- @param opts {bufnr:integer?}?
+--- @param opts {window_id:integer?}?
 function M.get(opts)
   opts = opts or {}
-  opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+  local window_id = opts.window_id or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
 
-  local panel = require("multito.copilot.panel.view").from(opts.bufnr)
+  local panel = require("multito.copilot.panel.view").from(bufnr)
   if not panel then
     return
   end
