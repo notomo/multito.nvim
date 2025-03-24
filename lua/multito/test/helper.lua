@@ -34,18 +34,22 @@ function helper.wait(promise)
 end
 
 function helper.request(result, starter)
+  local client = {
+    id = "dummyId",
+    offset_encoding = "utf-8",
+  }
   package.loaded["multito.copilot.lsp"] = {
     get_client = function()
-      return {
-        id = "dummyId",
-        offset_encoding = "utf-8",
-      }
+      return client
     end,
     request = function()
       return require("multito.vendor.promise").resolve(result.request_resolved)
     end,
     workspace_execute_command = function()
       return require("multito.vendor.promise").resolve(result.command_resolved)
+    end,
+    get_client_by_id = function()
+      return client
     end,
   }
   helper.wait(starter())

@@ -96,6 +96,14 @@ function M._show(show_ctx)
     opts.virt_lines = virt_lines
   end
   vim.api.nvim_buf_set_extmark(show_ctx.bufnr, ns, range.start.line, range.start.character, opts)
+
+  local client = vim.lsp.get_client_by_id(show_ctx.client_id)
+  if not client then
+    return
+  end
+  local method = "textDocument/didShowCompletion"
+  local params = { item = show_ctx.item }
+  client:notify(method, params)
 end
 
 --- Accepts completion.
