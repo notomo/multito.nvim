@@ -79,17 +79,19 @@ function M._show(show_ctx)
   local range = show_ctx.item.range
   local lines = vim.split(show_ctx.item.insertText, "\n", { plain = true })
 
+  local hl_groups = require("multito.highlight_group")
+
   local opts = {
     end_line = range["end"].line,
     end_col = range["end"].character,
     virt_text_pos = "overlay",
-    virt_text = { { lines[1], "NormalFloat" } },
+    virt_text = { { lines[1], hl_groups.MultitoInlineCompletionItem } },
   }
   local virt_lines = vim
     .iter(lines)
     :skip(1)
     :map(function(x)
-      return { { x, "NormalFloat" } }
+      return { { x, hl_groups.MultitoInlineCompletionItem } }
     end)
     :totable()
   if #virt_lines > 0 then
