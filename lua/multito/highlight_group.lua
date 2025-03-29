@@ -1,6 +1,7 @@
 local setup_highlight_groups = function()
   local highlightlib = require("multito.vendor.misclib.highlight")
   return {
+    --used for inline completion item
     MultitoInlineCompletionItem = highlightlib.link("MultitoInlineCompletionItem", "NormalFloat"),
   }
 end

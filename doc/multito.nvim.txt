@@ -69,4 +69,10 @@ get({opts})                                      *multito.copilot.panel.get()*
     {opts} ({window_id:integer?}?) 
 
 ==============================================================================
+HIGHLIGHT GROUPS                               *multito.nvim-HIGHLIGHT-GROUPS*
+
+MultitoInlineCompletionItem                   *hl-MultitoInlineCompletionItem*
+  used for inline completion item
+
+==============================================================================
 vim:tw=78:ts=8:ft=help
